@@ -92,7 +92,8 @@ export default function RootSystem() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white border border-moss-deep/20 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+              className="theme-card border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+              style={{ borderColor: 'var(--border-color)' }}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">

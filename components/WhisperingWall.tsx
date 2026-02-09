@@ -127,7 +127,7 @@ export default function WhisperingWall() {
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ delay: index * 0.05 }}
                   className={`
-                    ${getRandomColor()}
+                    ${note.isHost ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200/50' : getRandomColor()}
                     border border-moss-deep/10
                     rounded-lg p-4 mb-6 break-inside-avoid
                     shadow-sm hover:shadow-md transition-shadow
@@ -136,8 +136,13 @@ export default function WhisperingWall() {
                     transform: `rotate(${getRandomRotation()}deg)`,
                   }}
                 >
+                  {note.isHost && (
+                    <span className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-2 block">
+                      From the host
+                    </span>
+                  )}
                   <p className="text-sm text-moss-deep/90 mb-2 italic">
-                    "{note.message}"
+                    &quot;{note.message}&quot;
                   </p>
                   <div className="flex justify-between items-center mt-3 pt-3 border-t border-moss-deep/10">
                     <span className="text-xs font-medium text-moss-deep/70">

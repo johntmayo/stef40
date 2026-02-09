@@ -14,54 +14,16 @@ npm install
 
 ## Step 2: Set Up Google Sheet
 
-1. Create a new Google Sheet
-2. Create the following sheets/tabs:
+1. Create a new Google Sheet (or use your existing one).
+2. Create three tabs with these **exact names**: **Guests**, **Itinerary**, **Wall**.
 
-### Events Sheet
-Columns (Row 1 headers):
-- `id` - Unique identifier (e.g., UUID)
-- `name` - Event name
-- `date` - Event date (format: YYYY-MM-DD or readable format)
-- `time` - Event time (optional)
-- `description` - Event description (optional)
-- `isSecret` - TRUE/FALSE (whether event is secret)
-- `inviteList` - Comma-separated list of names (e.g., "Stef,Alex,Jordan")
-- `responses` - JSON object string (e.g., `{"Stef":"in","Alex":"out"}`)
+See **[SPREADSHEET_SETUP.md](./SPREADSHEET_SETUP.md)** for the exact column headers and examples for each tab. Summary:
 
-Example row:
-```
-id: event-001
-name: Morning Meditation
-date: 2024-06-15
-time: 7:00 AM
-description: Start the day with quiet reflection
-isSecret: FALSE
-inviteList: 
-responses: {}
-```
+- **Guests** – Column A header `Name`, then one guest name per row. This list powers the login dropdown.
+- **Itinerary** – Events. Row 1: `id`, `name`, `date`, `time`, `description`, `isSecret`, `inviteList`, `responses`. One event per row from row 2.
+- **Wall** – Guest notes and host posts. Row 1: `id`, `name`, `message`, `timestamp`, `isHost`. Notes are added by the site; you can leave it empty.
 
-### GuestNotes Sheet
-Columns (Row 1 headers):
-- `id` - Unique identifier
-- `name` - Guest name
-- `message` - Note message (max 200 chars)
-- `timestamp` - ISO timestamp
-
-### MistLevel Sheet
-Columns (Row 1 headers):
-- `level` - Mist level (e.g., "High", "Medium", "Low")
-- `message` - Message (e.g., "Bring a Sweater")
-
-Example row:
-```
-level: High
-message: Bring a Sweater
-```
-
-### UserMoods Sheet
-Columns (Row 1 headers):
-- `userName` - Guest name
-- `mood` - Selected mood (e.g., "quiet-moss", "chaotic-squirrel", "ancient-burl")
+Optional tabs **MistLevel** and **UserMoods** are created by the script if missing.
 
 ## Step 3: Set Up Google Apps Script
 
@@ -93,19 +55,9 @@ Replace:
 - `redwood` with your desired magic word (or keep it as "redwood")
 - `YOUR_SHEET_ID` with your Google Sheet ID
 
-## Step 5: Update Guest Names
+## Step 5: Guest names
 
-Edit `components/EntryWay.tsx` and update the `GUEST_NAMES` array with your actual guest list:
-
-```typescript
-const GUEST_NAMES = [
-  'Stef',
-  'Alex',
-  // ... add all guest names
-]
-```
-
-Alternatively, you can fetch this from your Google Sheet by adding a new sheet and endpoint.
+Guest names are loaded from the **Guests** sheet (column A). Add one name per row under the header. No need to edit code.
 
 ## Step 6: Run the Development Server
 
@@ -117,15 +69,21 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Step 7: Test the Application
 
-1. Go to the entry page
-2. Select a name from the dropdown
-3. Enter the magic word
-4. Click "Enter"
-5. Navigate through the different sections:
-   - **Canopy**: Set your mood
-   - **Root System**: Toggle event responses
-   - **Forest Path**: View the itinerary
-   - **Whispering Wall**: Leave a note
+1. Go to the entry page.
+2. Select a name from the dropdown (filled from your Guests sheet).
+3. Enter the magic word.
+4. Click "Enter".
+5. Use the **theme toggle** (paint palette icon in the nav) to switch Light / Dusk / Dark.
+6. Navigate:
+   - **Canopy** – Set your mood.
+   - **Root System** – Toggle In/Out for each event.
+   - **Forest Path** – View the itinerary and mist level.
+   - **Whispering Wall** – Leave a note; host posts show as "From the host".
+7. **Admin (Stef only):** When logged in as **Stef**, the nav shows an Admin link. There you can:
+   - Create events (they appear on Root System and Forest Path).
+   - Make posts (they appear on the Whispering Wall as host posts).
+   - See who has RSVP'd to each event.
+   - Open the Google Sheet to edit data directly.
 
 ## Troubleshooting
 

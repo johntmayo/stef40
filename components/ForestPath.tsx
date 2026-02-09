@@ -77,7 +77,8 @@ export default function ForestPath() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mb-12 bg-white border border-moss-deep/20 rounded-lg p-6 shadow-sm"
+            className="mb-12 theme-card border rounded-lg p-6 shadow-sm"
+ style={{ borderColor: 'var(--border-color)' }}
           >
             <div className="flex items-center gap-3">
               <span className="text-3xl">🌫️</span>
@@ -110,7 +111,7 @@ export default function ForestPath() {
                 <div className="absolute left-2 md:left-6 top-6 w-4 h-4 bg-moss-deep rounded-full border-4 border-mist-light" />
 
                 {/* Event Card */}
-                <div className="bg-white border border-moss-deep/20 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="theme-card border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ borderColor: 'var(--border-color)' }}>
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="text-xl font-serif text-moss-deep">
                       {event.name || 'Untitled Event'}

@@ -8,10 +8,29 @@
   --moss-deep: #2D3A27;
   --bark-dark: #3E2E1F;
   --mist-light: #E5E7E6;
+  --page-bg: #E5E7E6;
+  --page-text: #2D3A27;
+  --card-bg: #ffffff;
+  --border-color: rgba(45, 58, 39, 0.2);
+}
+
+[data-theme='dusk'] {
+  --page-bg: #3D4A36;
+  --page-text: #E8EBE4;
+  --card-bg: #2D3A27;
+  --border-color: rgba(232, 235, 228, 0.2);
+}
+
+[data-theme='dark'] {
+  --page-bg: #1a1f17;
+  --page-text: #d4d9d0;
+  --card-bg: #252d22;
+  --border-color: rgba(212, 217, 208, 0.2);
 }
 
 body {
-  @apply bg-mist-light text-moss-deep;
+  background-color: var(--page-bg);
+  color: var(--page-text);
   font-family: 'Inter', system-ui, sans-serif;
 }
 
@@ -22,6 +41,17 @@ h1, h2, h3, h4, h5, h6 {
 .dappled-light {
   background: radial-gradient(ellipse at top, rgba(255,255,255,0.1) 0%, transparent 50%),
               radial-gradient(ellipse at bottom, rgba(255,255,255,0.05) 0%, transparent 50%);
+}
+
+[data-theme='dusk'] .dappled-light,
+[data-theme='dark'] .dappled-light {
+  background: radial-gradient(ellipse at top, rgba(255,255,255,0.05) 0%, transparent 50%),
+              radial-gradient(ellipse at bottom, rgba(0,0,0,0.1) 0%, transparent 50%);
+}
+
+.theme-card {
+  background-color: var(--card-bg);
+  border-color: var(--border-color);
 }
 
 /* Smooth scrolling */

@@ -23,6 +23,18 @@ export interface GuestNote {
   name: string
   message: string
   timestamp: string
+  isHost?: boolean
+}
+
+export interface CreateEventPayload {
+  id?: string
+  name: string
+  date: string
+  time?: string
+  description?: string
+  isSecret?: boolean
+  inviteList?: string[]
+  responses?: Record<string, 'in' | 'out'>
 }
 
 export interface MistLevel {
@@ -216,5 +228,71 @@ export async function getUserMood(userName: string): Promise<string | null> {
   if (!response.ok) throw new Error('Failed to fetch user mood')
   const data = await response.json()
   return data.mood || null
+}
+
+/** All events with responses (no secret filtering). For admin only. */
+export async function getAllEvents(): Promise<Event[]> {
+  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  if (!url) return []
+  try {
+    const response = await fetch(`${url}?action=getAllEvents`)
+    if (!response.ok) throw new Error('Failed to fetch events')
+    const data = await response.json()
+    return Array.isArray(data) ? data : []
+  } catch (error) {
+    console.error('Error fetching all events:', error)
+    return []
+  }
+}
+
+export async function getGuests(): Promise<string[]> {
+  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  if (!url) {
+    console.warn('Google Script URL not configured')
+    return []
+  }
+  try {
+    const response = await fetch(`${url}?action=getGuests`)
+    if (!response.ok) throw new Error('Failed to fetch guests')
+    const data = await response.json()
+    return Array.isArray(data) ? data : []
+  } catch (error) {
+    console.error('Error fetching guests:', error)
+    return []
+  }
+}
+
+export async function createEvent(event: CreateEventPayload): Promise<void> {
+  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  if (!url) throw new Error('Google Script URL not configured')
+  const payload = {
+    ...event,
+    id: event.id || crypto.randomUUID?.() ?? `event-${Date.now()}`,
+    inviteList: Array.isArray(event.inviteList) ? event.inviteList : [],
+    responses: event.responses ?? {},
+  }
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'createEvent', event: payload }),
+  })
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error((err as { error?: string }).error || 'Failed to create event')
+  }
+}
+
+export async function addPost(name: string, message: string): Promise<void> {
+  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  if (!url) throw new Error('Google Script URL not configured')
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'addPost', name, message }),
+  })
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error((err as { error?: string }).error || 'Failed to add post')
+  }
 }
 
