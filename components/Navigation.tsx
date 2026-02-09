@@ -17,7 +17,6 @@ const NAV_ITEMS = [
 
 const THEMES: { value: Theme; label: string }[] = [
   { value: 'light', label: 'Light' },
-  { value: 'dusk', label: 'Dusk' },
   { value: 'dark', label: 'Dark' },
 ]
 

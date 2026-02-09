@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
-export type Theme = 'light' | 'dusk' | 'dark'
+export type Theme = 'light' | 'dark'
 
 const THEME_KEY = 'redwood_theme'
 
@@ -23,8 +23,9 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     const stored = localStorage.getItem(THEME_KEY) as Theme | null
-    if (stored && ['light', 'dusk', 'dark'].includes(stored)) {
-      setThemeState(stored)
+    if (stored) {
+      if (stored === 'light' || stored === 'dark') setThemeState(stored)
+      else if (stored === 'dusk') setThemeState('dark') // legacy
     }
     setMounted(true)
   }, [])

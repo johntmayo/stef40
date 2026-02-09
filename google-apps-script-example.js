@@ -126,20 +126,23 @@ function getGuests() {
 // ——— Logistics (Info page) ———
 // Sheet "Logistics": columns "key" and "value" (or "label" and "content"). One row per item.
 function getLogistics() {
-  const sheet = getSpreadsheet().getSheetByName(SHEET_NAMES.LOGISTICS);
-  if (!sheet || sheet.getLastRow() < 1) return [];
+  const ss = getSpreadsheet();
+  var sheet = ss.getSheetByName(SHEET_NAMES.LOGISTICS) || ss.getSheetByName('logistics');
+  if (!sheet) return [];
   var data;
   try {
     data = sheet.getDataRange().getValues();
   } catch (e) {
     return [];
   }
-  if (!data.length) return [];
+  if (!data || data.length < 1) return [];
   const headers = data[0].map(function (h) {
     return (h || '').toString().toLowerCase().replace(/\s+/g, '');
   });
-  const keyCol = headers.indexOf('key') >= 0 ? headers.indexOf('key') : headers.indexOf('label');
-  const valCol = headers.indexOf('value') >= 0 ? headers.indexOf('value') : headers.indexOf('content');
+  var keyCol = headers.indexOf('key');
+  if (keyCol === -1) keyCol = headers.indexOf('label');
+  var valCol = headers.indexOf('value');
+  if (valCol === -1) valCol = headers.indexOf('content');
   if (keyCol === -1 || valCol === -1) return [];
   const out = [];
   for (let i = 1; i < data.length; i++) {
@@ -183,14 +186,21 @@ function getEvents(userName) {
       }
     }
 
-    if (event.issecret === true || event.issecret === 'TRUE' || event.issecret === 'true') {
+    var isSecret = event.issecret === true || event.issecret === 'TRUE' || event.issecret === 'true' ||
+      event.issecret === 'YES' || event.issecret === 'yes' || event.issecret === 1 || event.issecret === '1';
+    if (isSecret) {
       const inviteList = (event.invitelist || '')
         .toString()
         .split(',')
         .map(function (n) {
-          return n.trim();
-        });
-      if (!inviteList.includes(userName)) continue;
+          return n.trim().toLowerCase();
+        })
+        .filter(Boolean);
+      const userLower = (userName || '').toString().trim().toLowerCase();
+      var isInvited = inviteList.some(function (name) {
+        return name === userLower;
+      });
+      if (!isInvited) continue;
     }
 
     events.push(event);

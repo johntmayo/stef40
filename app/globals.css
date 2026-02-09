@@ -14,18 +14,11 @@
   --border-color: rgba(45, 58, 39, 0.2);
 }
 
-[data-theme='dusk'] {
-  --page-bg: #3D4A36;
-  --page-text: #E8EBE4;
-  --card-bg: #2D3A27;
-  --border-color: rgba(232, 235, 228, 0.2);
-}
-
 [data-theme='dark'] {
   --page-bg: #1a1f17;
-  --page-text: #d4d9d0;
+  --page-text: #e4e9e0;
   --card-bg: #252d22;
-  --border-color: rgba(212, 217, 208, 0.2);
+  --border-color: rgba(228, 233, 224, 0.25);
 }
 
 body {
@@ -43,10 +36,25 @@ h1, h2, h3, h4, h5, h6 {
               radial-gradient(ellipse at bottom, rgba(255,255,255,0.05) 0%, transparent 50%);
 }
 
-[data-theme='dusk'] .dappled-light,
 [data-theme='dark'] .dappled-light {
   background: radial-gradient(ellipse at top, rgba(255,255,255,0.05) 0%, transparent 50%),
               radial-gradient(ellipse at bottom, rgba(0,0,0,0.1) 0%, transparent 50%);
+}
+
+/* Ensure legible text in dark theme (override component classes) */
+[data-theme='dark'] .event-heading,
+[data-theme='dark'] .event-meta,
+[data-theme='dark'] .event-badge {
+  color: var(--page-text);
+}
+[data-theme='dark'] .event-badge {
+  background: rgba(228, 233, 224, 0.15);
+}
+[data-theme='dark'] .text-moss-deep,
+[data-theme='dark'] .text-moss-deep\/60,
+[data-theme='dark'] .text-moss-deep\/70,
+[data-theme='dark'] .text-moss-deep\/90 {
+  color: var(--page-text);
 }
 
 .theme-card {

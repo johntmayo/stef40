@@ -22,7 +22,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [eventForm, setEventForm] = useState<CreateEventPayload>({
     name: '',
-    date: '',
+    date: '2026-08-01',
     time: '',
     endTime: '',
     location: '',
@@ -77,7 +77,7 @@ export default function AdminPage() {
         responses: {},
       })
       showMsg('ok', 'Event created.')
-      setEventForm({ name: '', date: '', time: '', endTime: '', location: '', description: '', isSecret: false, inviteList: [] })
+      setEventForm({ name: '', date: '2026-08-01', time: '', endTime: '', location: '', description: '', isSecret: false, inviteList: [] })
       await loadData()
     } catch (err) {
       showMsg('err', err instanceof Error ? err.message : 'Failed to create event.')
@@ -160,45 +160,48 @@ export default function AdminPage() {
                   required
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1 opacity-80" style={{ color: 'var(--page-text)' }}>
-                    Date *
-                  </label>
-                  <input
-                    type="date"
-                    value={eventForm.date}
-                    onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })}
-                    className="w-full px-3 py-2 rounded border bg-transparent"
-                    style={{ borderColor: 'var(--border-color)', color: 'var(--page-text)' }}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1 opacity-80" style={{ color: 'var(--page-text)' }}>
-                    Start time
-                  </label>
-                  <input
-                    type="text"
-                    value={eventForm.time || ''}
-                    onChange={(e) => setEventForm({ ...eventForm, time: e.target.value })}
-                    placeholder="e.g. 6:00 PM"
-                    className="w-full px-3 py-2 rounded border bg-transparent"
-                    style={{ borderColor: 'var(--border-color)', color: 'var(--page-text)' }}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1 opacity-80" style={{ color: 'var(--page-text)' }}>
-                    End time
-                  </label>
-                  <input
-                    type="text"
-                    value={eventForm.endTime || ''}
-                    onChange={(e) => setEventForm({ ...eventForm, endTime: e.target.value })}
-                    placeholder="e.g. 8:00 PM"
-                    className="w-full px-3 py-2 rounded border bg-transparent"
-                    style={{ borderColor: 'var(--border-color)', color: 'var(--page-text)' }}
-                  />
+              <div>
+                <label className="block text-sm font-medium mb-1 opacity-80" style={{ color: 'var(--page-text)' }}>
+                  Date *
+                </label>
+                <input
+                  type="date"
+                  value={eventForm.date}
+                  onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })}
+                  className="w-full max-w-xs px-3 py-2 rounded border bg-transparent"
+                  style={{ borderColor: 'var(--border-color)', color: 'var(--page-text)' }}
+                  required
+                />
+              </div>
+              <div className="flex flex-wrap gap-4 items-end">
+                <div className="flex items-center gap-2">
+                  <div>
+                    <label className="block text-sm font-medium mb-1 opacity-80" style={{ color: 'var(--page-text)' }}>
+                      Start time
+                    </label>
+                    <input
+                      type="text"
+                      value={eventForm.time || ''}
+                      onChange={(e) => setEventForm({ ...eventForm, time: e.target.value })}
+                      placeholder="6:00 PM"
+                      className="w-28 px-3 py-2 rounded border bg-transparent"
+                      style={{ borderColor: 'var(--border-color)', color: 'var(--page-text)' }}
+                    />
+                  </div>
+                  <span className="text-sm opacity-70 pb-2" style={{ color: 'var(--page-text)' }}>–</span>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 opacity-80" style={{ color: 'var(--page-text)' }}>
+                      End time
+                    </label>
+                    <input
+                      type="text"
+                      value={eventForm.endTime || ''}
+                      onChange={(e) => setEventForm({ ...eventForm, endTime: e.target.value })}
+                      placeholder="8:00 PM"
+                      className="w-28 px-3 py-2 rounded border bg-transparent"
+                      style={{ borderColor: 'var(--border-color)', color: 'var(--page-text)' }}
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1 opacity-80" style={{ color: 'var(--page-text)' }}>
@@ -209,7 +212,7 @@ export default function AdminPage() {
                     value={eventForm.location || ''}
                     onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })}
                     placeholder="e.g. Main Lodge"
-                    className="w-full px-3 py-2 rounded border bg-transparent"
+                    className="w-48 px-3 py-2 rounded border bg-transparent"
                     style={{ borderColor: 'var(--border-color)', color: 'var(--page-text)' }}
                   />
                 </div>

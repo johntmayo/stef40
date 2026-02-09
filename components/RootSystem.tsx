@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { getUserName } from '@/lib/auth'
 import { getEvents, updateEventResponse, Event } from '@/lib/useGoogleSheets'
+import { formatEventDateTime } from '@/lib/formatEvent'
 
 export default function RootSystem() {
   const [userName, setUserName] = useState<string | null>(null)
@@ -33,19 +34,15 @@ export default function RootSystem() {
     }
   }
 
-  const handleToggle = async (eventId: string, currentResponse: 'in' | 'out' | undefined) => {
+  const setResponse = async (eventId: string, response: 'in' | 'out') => {
     if (!userName || updating) return
-
-    const newResponse = currentResponse === 'in' ? 'out' : 'in'
     setUpdating(eventId)
-
     try {
-      await updateEventResponse(eventId, userName, newResponse)
-      // Update local state
+      await updateEventResponse(eventId, userName, response)
       setEvents((prevEvents) =>
         prevEvents.map((event) =>
           event.id === eventId
-            ? { ...event, responses: { ...event.responses, [userName]: newResponse } }
+            ? { ...event, responses: { ...(event.responses || {}), [userName]: response } }
             : event
         )
       )
@@ -81,71 +78,90 @@ export default function RootSystem() {
         >
           RSVPs
         </motion.h2>
-        <p className="text-moss-deep/70 mb-8 text-sm md:text-base">
-          Say In or Out for each event
+        <p className="event-meta mb-8 text-sm md:text-base">
+          Let us know if you&apos;re coming to each event
         </p>
 
         <div className="space-y-4">
-          {events.map((event, index) => (
-            <motion.div
-              key={event.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="theme-card border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-              style={{ borderColor: 'var(--border-color)' }}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-xl font-serif text-moss-deep">
-                      {event.name || 'Untitled Event'}
-                    </h3>
-                    {event.isSecret && (
-                      <span className="text-xs px-2 py-1 bg-moss-deep/10 text-moss-deep rounded-full">
-                        Secret Offering
-                      </span>
+          {events.map((event, index) => {
+            const responses = event.responses && typeof event.responses === 'object' ? event.responses : {}
+            const myResponse = userName ? responses[userName] : undefined
+            const { dateLine, timeLocationLine } = formatEventDateTime(event)
+            return (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="theme-card border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+                style={{ borderColor: 'var(--border-color)' }}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-xl font-serif event-heading">
+                        {event.name || 'Untitled Event'}
+                      </h3>
+                      {event.isSecret && (
+                        <span className="text-xs px-2 py-1 rounded-full event-badge">
+                          Secret
+                        </span>
+                      )}
+                    </div>
+                    {dateLine && <p className="event-meta text-sm mb-0.5">{dateLine}</p>}
+                    {timeLocationLine && <p className="event-meta text-sm mb-2 opacity-90">{timeLocationLine}</p>}
+                    {event.description && (
+                      <p className="text-sm event-meta mt-2 opacity-90">
+                        {event.description}
+                      </p>
+                    )}
+                    {myResponse && (
+                      <p className="text-sm mt-2 event-meta">
+                        You&apos;re {myResponse === 'in' ? 'going' : 'not going'}.
+                      </p>
                     )}
                   </div>
-                  <p className="text-sm text-moss-deep/60 mb-2">
-                    {event.date || ''}
-                    {event.time && ` • ${event.time}`}
-                    {event.endTime && ` – ${event.endTime}`}
-                    {event.location && ` • ${event.location}`}
-                  </p>
-                  {event.description && (
-                    <p className="text-sm text-moss-deep/70 mt-2">
-                      {event.description}
-                    </p>
-                  )}
-                </div>
 
-                <div className="ml-4">
-                  <motion.button
-                    onClick={() => handleToggle(event.id, event.responses && typeof event.responses === 'object' ? event.responses[userName || ''] : undefined)}
-                    disabled={updating === event.id}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`
-                      px-6 py-2 rounded-md border-2 font-medium transition-all
-                      ${
-                        event.responses && typeof event.responses === 'object' && event.responses[userName || ''] === 'in'
+                  <div className="flex gap-2 shrink-0">
+                    <motion.button
+                      type="button"
+                      onClick={() => setResponse(event.id, 'in')}
+                      disabled={updating === event.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`
+                        px-4 py-2 rounded-md border-2 font-medium transition-all text-sm
+                        ${myResponse === 'in'
                           ? 'bg-moss-deep text-mist-light border-moss-deep'
-                          : 'bg-white text-moss-deep border-moss-deep/30 hover:border-moss-deep/50'
-                      }
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                    `}
-                  >
-                    {updating === event.id
-                      ? '...'
-                      : event.responses && typeof event.responses === 'object' && event.responses[userName || ''] === 'in'
-                      ? 'In'
-                      : 'Out'}
-                  </motion.button>
+                          : 'border-current opacity-70 hover:opacity-100'}
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                      `}
+                      style={myResponse !== 'in' ? { borderColor: 'var(--border-color)', color: 'var(--page-text)' } : undefined}
+                    >
+                      {updating === event.id ? '…' : "I'm going"}
+                    </motion.button>
+                    <motion.button
+                      type="button"
+                      onClick={() => setResponse(event.id, 'out')}
+                      disabled={updating === event.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`
+                        px-4 py-2 rounded-md border-2 font-medium transition-all text-sm
+                        ${myResponse === 'out'
+                          ? 'border-red-400 bg-red-400/20 text-red-700 dark:text-red-300'
+                          : 'border-current opacity-70 hover:opacity-100'}
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                      `}
+                      style={myResponse !== 'out' ? { borderColor: 'var(--border-color)', color: 'var(--page-text)' } : undefined}
+                    >
+                      {updating === event.id ? '…' : "I'm not going"}
+                    </motion.button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            )
+          })}
 
           {events.length === 0 && (
             <p className="text-moss-deep/70 text-center py-12">

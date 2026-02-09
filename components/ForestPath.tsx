@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { getEvents, getMistLevel, Event, MistLevel } from '@/lib/useGoogleSheets'
 import { getUserName } from '@/lib/auth'
+import { formatEventDateTime } from '@/lib/formatEvent'
 
 export default function ForestPath() {
   const [userName, setUserName] = useState<string | null>(null)
@@ -113,30 +114,33 @@ export default function ForestPath() {
                 {/* Event Card */}
                 <div className="theme-card border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow" style={{ borderColor: 'var(--border-color)' }}>
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-xl font-serif text-moss-deep">
+                    <h3 className="text-xl font-serif event-heading">
                       {event.name || 'Untitled Event'}
                     </h3>
                     {event.isSecret && (
-                      <span className="text-xs px-2 py-1 bg-moss-deep/10 text-moss-deep rounded-full">
+                      <span className="text-xs px-2 py-1 rounded-full event-badge">
                         Secret
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-moss-deep/60 mb-2">
-                    {event.date || ''}
-                    {event.time && ` • ${event.time}`}
-                    {event.endTime && ` – ${event.endTime}`}
-                    {event.location && ` • ${event.location}`}
-                  </p>
+                  {(() => {
+                    const { dateLine, timeLocationLine } = formatEventDateTime(event)
+                    return (
+                      <>
+                        {dateLine && <p className="text-sm event-meta mb-0.5">{dateLine}</p>}
+                        {timeLocationLine && <p className="text-sm event-meta mb-2 opacity-90">{timeLocationLine}</p>}
+                      </>
+                    )
+                  })()}
                   {event.description && (
-                    <p className="text-sm text-moss-deep/70 mt-2">
+                    <p className="text-sm event-meta mt-2 opacity-90">
                       {event.description}
                     </p>
                   )}
                   {userName && event.responses && typeof event.responses === 'object' && event.responses[userName] && (
-                    <div className="mt-3 pt-3 border-t border-moss-deep/10">
-                      <span className="text-xs text-moss-deep/60">
-                        Your response: <span className="font-medium capitalize">{event.responses[userName]}</span>
+                    <div className="mt-3 pt-3 border-t event-meta" style={{ borderColor: 'var(--border-color)' }}>
+                      <span className="text-xs opacity-90">
+                        You&apos;re {event.responses[userName] === 'in' ? 'going' : 'not going'}.
                       </span>
                     </div>
                   )}
