@@ -79,10 +79,10 @@ export default function RootSystem() {
           animate={{ opacity: 1, y: 0 }}
           className="text-3xl md:text-4xl font-serif text-moss-deep mb-8"
         >
-          The Root System
+          RSVPs
         </motion.h2>
         <p className="text-moss-deep/70 mb-8 text-sm md:text-base">
-          Toggle your presence for each gathering
+          Say In or Out for each event
         </p>
 
         <div className="space-y-4">
@@ -108,7 +108,10 @@ export default function RootSystem() {
                     )}
                   </div>
                   <p className="text-sm text-moss-deep/60 mb-2">
-                    {event.date || ''} {event.time && `• ${event.time}`}
+                    {event.date || ''}
+                    {event.time && ` • ${event.time}`}
+                    {event.endTime && ` – ${event.endTime}`}
+                    {event.location && ` • ${event.location}`}
                   </p>
                   {event.description && (
                     <p className="text-sm text-moss-deep/70 mt-2">

@@ -11,8 +11,10 @@ export interface Event {
   id: string
   name: string
   date: string
-  time: string
-  description: string
+  time?: string
+  endTime?: string
+  location?: string
+  description?: string
   isSecret: boolean
   inviteList: string[]
   responses: Record<string, 'in' | 'out'>
@@ -31,6 +33,8 @@ export interface CreateEventPayload {
   name: string
   date: string
   time?: string
+  endTime?: string
+  location?: string
   description?: string
   isSecret?: boolean
   inviteList?: string[]
@@ -293,6 +297,24 @@ export async function addPost(name: string, message: string): Promise<void> {
   if (!response.ok) {
     const err = await response.json().catch(() => ({}))
     throw new Error((err as { error?: string }).error || 'Failed to add post')
+  }
+}
+
+export interface LogisticsItem {
+  key: string
+  value: string
+}
+
+export async function getLogistics(): Promise<LogisticsItem[]> {
+  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  if (!url) return []
+  try {
+    const response = await fetch(`${url}?action=getLogistics`)
+    if (!response.ok) return []
+    const data = await response.json()
+    return Array.isArray(data) ? data : []
+  } catch {
+    return []
   }
 }
 

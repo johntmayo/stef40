@@ -16,7 +16,7 @@ The site uses this list for the “Identify yourself in the grove” dropdown on
 ## 2. **Itinerary** tab (events)
 
 - **Row 1 (headers):**  
-  `id` | `name` | `date` | `time` | `description` | `isSecret` | `inviteList` | `responses`
+  `id` | `name` | `date` | `time` | `endTime` | `location` | `description` | `isSecret` | `inviteList` | `responses`
 
 - **From row 2:** One event per row.
 
@@ -25,14 +25,16 @@ The site uses this list for the “Identify yourself in the grove” dropdown on
 | id          | `event-001` or leave blank | Script can generate if blank |
 | name        | Morning Coffee             | Event title |
 | date        | 2025-06-15                 | YYYY-MM-DD works best |
-| time        | 9:00 AM                    | Optional |
+| time        | 9:00 AM                    | Start time (optional) |
+| endTime     | 11:00 AM                   | End time (optional) |
+| location    | Main Lodge                 | Where (optional) |
 | description | Optional text              | Optional |
 | isSecret    | FALSE                      | TRUE = only invited guests see it |
 | inviteList  | Stef, Alex, Jordan         | Comma-separated names (for secret events) |
 | responses   | `{}`                       | Leave as `{}`; script fills RSVPs |
 
 **Example row 2:**  
-`event-001` | `Welcome Dinner` | `2025-06-14` | `6:00 PM` | `Meet at the lodge` | FALSE | | `{}`
+`event-001` | `Welcome Dinner` | `2025-06-14` | `6:00 PM` | `8:00 PM` | `Main Lodge` | `Meet at the lodge` | FALSE | | `{}`
 
 ---
 
@@ -49,10 +51,24 @@ You can leave the Wall empty; the script (and “Leave note” / Admin “Make p
 
 ---
 
+## 4. **Logistics** tab (optional – Info page)
+
+- **Row 1 (headers):** `key` | `value` (or `label` | `content`)
+- **From row 2:** One row per info item. The **Info** page on the site displays these.
+
+Examples:  
+Row 2: `When` | `June 14–16, 2025`  
+Row 3: `Where` | `Redwood Retreat, 123 Forest Rd`  
+Row 4: `What to bring` | `Warm layers, flashlight, good shoes`
+
+Stef can edit this sheet to share basic logistics with everyone.
+
+---
+
 ## Optional tabs (created by the script if missing)
 
 - **MistLevel** – Row 1: `level` | `message`. Row 2: e.g. `Medium` | `Dress in layers.`
-- **UserMoods** – Row 1: `userName` | `mood`. Data rows are added when guests set their mood on the Canopy page.
+- **UserMoods** – Row 1: `userName` | `mood`. Data rows are added when guests set their mood on the Dashboard.
 
 If you don’t create these, the script will create them when needed.
 

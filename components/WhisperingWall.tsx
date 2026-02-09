@@ -76,10 +76,10 @@ export default function WhisperingWall() {
           animate={{ opacity: 1, y: 0 }}
           className="text-3xl md:text-4xl font-serif text-moss-deep mb-8"
         >
-          The Whispering Wall
+          Guestbook
         </motion.h2>
         <p className="text-moss-deep/70 mb-8 text-sm md:text-base">
-          Leave a note for the grove
+          Leave a note for everyone to see
         </p>
 
         {/* Add Note Form */}

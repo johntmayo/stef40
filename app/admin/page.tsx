@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { getUserName } from '@/lib/auth'
+import { getUserName, STEF_ADMIN_NAME } from '@/lib/auth'
 import Navigation from '@/components/Navigation'
 import {
   getGuests,
@@ -13,8 +13,6 @@ import {
   type Event,
   type CreateEventPayload,
 } from '@/lib/useGoogleSheets'
-
-const ADMIN_NAME = 'Stef'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -26,6 +24,8 @@ export default function AdminPage() {
     name: '',
     date: '',
     time: '',
+    endTime: '',
+    location: '',
     description: '',
     isSecret: false,
     inviteList: [],
@@ -38,7 +38,7 @@ export default function AdminPage() {
   useEffect(() => {
     const name = getUserName()
     setUserName(name)
-    if (name !== ADMIN_NAME) {
+    if (name !== STEF_ADMIN_NAME) {
       router.replace('/')
       return
     }
@@ -77,7 +77,7 @@ export default function AdminPage() {
         responses: {},
       })
       showMsg('ok', 'Event created.')
-      setEventForm({ name: '', date: '', time: '', description: '', isSecret: false, inviteList: [] })
+      setEventForm({ name: '', date: '', time: '', endTime: '', location: '', description: '', isSecret: false, inviteList: [] })
       await loadData()
     } catch (err) {
       showMsg('err', err instanceof Error ? err.message : 'Failed to create event.')
@@ -100,8 +100,8 @@ export default function AdminPage() {
     if (!postMessage.trim()) return
     setSavingPost(true)
     try {
-      await addPost(ADMIN_NAME, postMessage.trim())
-      showMsg('ok', 'Post added to the Wall.')
+      await addPost(STEF_ADMIN_NAME, postMessage.trim())
+      showMsg('ok', 'Post added to the Guestbook.')
       setPostMessage('')
     } catch (err) {
       showMsg('err', err instanceof Error ? err.message : 'Failed to add post.')
@@ -112,7 +112,7 @@ export default function AdminPage() {
 
   const googleSheetUrl = process.env.NEXT_PUBLIC_GOOGLE_SHEET_URL || '#'
 
-  if (userName !== ADMIN_NAME) return null
+  if (userName !== STEF_ADMIN_NAME) return null
 
   return (
     <>
@@ -176,13 +176,39 @@ export default function AdminPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1 opacity-80" style={{ color: 'var(--page-text)' }}>
-                    Time
+                    Start time
                   </label>
                   <input
                     type="text"
-                    value={eventForm.time}
+                    value={eventForm.time || ''}
                     onChange={(e) => setEventForm({ ...eventForm, time: e.target.value })}
                     placeholder="e.g. 6:00 PM"
+                    className="w-full px-3 py-2 rounded border bg-transparent"
+                    style={{ borderColor: 'var(--border-color)', color: 'var(--page-text)' }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 opacity-80" style={{ color: 'var(--page-text)' }}>
+                    End time
+                  </label>
+                  <input
+                    type="text"
+                    value={eventForm.endTime || ''}
+                    onChange={(e) => setEventForm({ ...eventForm, endTime: e.target.value })}
+                    placeholder="e.g. 8:00 PM"
+                    className="w-full px-3 py-2 rounded border bg-transparent"
+                    style={{ borderColor: 'var(--border-color)', color: 'var(--page-text)' }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 opacity-80" style={{ color: 'var(--page-text)' }}>
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    value={eventForm.location || ''}
+                    onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })}
+                    placeholder="e.g. Main Lodge"
                     className="w-full px-3 py-2 rounded border bg-transparent"
                     style={{ borderColor: 'var(--border-color)', color: 'var(--page-text)' }}
                   />
@@ -248,7 +274,7 @@ export default function AdminPage() {
               Make a post
             </h2>
             <p className="text-sm opacity-80 mb-3" style={{ color: 'var(--page-text)' }}>
-              This will appear on the Whispering Wall as a post from you (the host).
+              This will appear on the Guestbook as a post from you (the host).
             </p>
             <form onSubmit={handleAddPost} className="space-y-3">
               <textarea
@@ -265,7 +291,7 @@ export default function AdminPage() {
                 disabled={savingPost || !postMessage.trim()}
                 className="px-4 py-2 rounded font-medium bg-moss-deep text-mist-light hover:bg-moss-light disabled:opacity-50"
               >
-                {savingPost ? 'Posting…' : 'Post to Wall'}
+                {savingPost ? 'Posting…' : 'Post to Guestbook'}
               </button>
             </form>
           </section>
@@ -295,7 +321,10 @@ export default function AdminPage() {
                         {ev.name || 'Untitled'}
                         {ev.date && (
                           <span className="text-sm font-normal opacity-80 ml-2">
-                            {ev.date} {ev.time && `· ${ev.time}`}
+                            {ev.date}
+                            {ev.time && ` · ${ev.time}`}
+                            {ev.endTime && ` – ${ev.endTime}`}
+                            {ev.location && ` · ${ev.location}`}
                           </span>
                         )}
                       </div>

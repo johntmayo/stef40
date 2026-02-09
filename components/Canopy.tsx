@@ -69,7 +69,7 @@ export default function Canopy() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="text-3xl md:text-5xl font-serif text-moss-deep mb-4"
         >
-          Welcome back to the clearing, {userName}
+          Welcome back, {userName}
           {currentMood && (
             <span className="ml-3 text-2xl md:text-4xl">
               {MOOD_ICONS[currentMood]}

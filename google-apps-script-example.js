@@ -17,6 +17,7 @@ const SHEET_NAMES = {
   GUEST_NOTES: 'Wall',
   MIST_LEVEL: 'MistLevel',
   USER_MOODS: 'UserMoods',
+  LOGISTICS: 'Logistics',
 };
 
 function doGet(e) {
@@ -46,6 +47,10 @@ function doGet(e) {
 
       case 'getUserMood':
         return ContentService.createTextOutput(JSON.stringify({ mood: getUserMood(e.parameter.userName) }))
+          .setMimeType(ContentService.MimeType.JSON);
+
+      case 'getLogistics':
+        return ContentService.createTextOutput(JSON.stringify(getLogistics()))
           .setMimeType(ContentService.MimeType.JSON);
 
       default:
@@ -116,6 +121,33 @@ function getGuests() {
     if (name) names.push(name);
   }
   return names;
+}
+
+// ——— Logistics (Info page) ———
+// Sheet "Logistics": columns "key" and "value" (or "label" and "content"). One row per item.
+function getLogistics() {
+  const sheet = getSpreadsheet().getSheetByName(SHEET_NAMES.LOGISTICS);
+  if (!sheet || sheet.getLastRow() < 1) return [];
+  var data;
+  try {
+    data = sheet.getDataRange().getValues();
+  } catch (e) {
+    return [];
+  }
+  if (!data.length) return [];
+  const headers = data[0].map(function (h) {
+    return (h || '').toString().toLowerCase().replace(/\s+/g, '');
+  });
+  const keyCol = headers.indexOf('key') >= 0 ? headers.indexOf('key') : headers.indexOf('label');
+  const valCol = headers.indexOf('value') >= 0 ? headers.indexOf('value') : headers.indexOf('content');
+  if (keyCol === -1 || valCol === -1) return [];
+  const out = [];
+  for (let i = 1; i < data.length; i++) {
+    const key = (data[i][keyCol] || '').toString().trim();
+    const value = (data[i][valCol] || '').toString().trim();
+    if (key) out.push({ key: key, value: value });
+  }
+  return out;
 }
 
 // ——— Events (Itinerary) ———
@@ -232,19 +264,21 @@ function createEvent(event) {
   let sheet = ss.getSheetByName(SHEET_NAMES.EVENTS);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAMES.EVENTS);
-    sheet.appendRow(['id', 'name', 'date', 'time', 'description', 'isSecret', 'inviteList', 'responses']);
+    sheet.appendRow(['id', 'name', 'date', 'time', 'endTime', 'location', 'description', 'isSecret', 'inviteList', 'responses']);
   }
   const id = event.id || Utilities.getUuid();
   const name = event.name || '';
   const date = event.date || '';
   const time = event.time || '';
+  const endTime = event.endTime || '';
+  const location = event.location || '';
   const description = event.description || '';
   const isSecret = event.isSecret === true || event.isSecret === 'TRUE' || event.isSecret === 'true';
   const inviteList = Array.isArray(event.inviteList)
     ? event.inviteList.join(', ')
     : (event.inviteList || '').toString();
   const responses = typeof event.responses === 'object' ? JSON.stringify(event.responses || {}) : '{}';
-  sheet.appendRow([id, name, date, time, description, isSecret, inviteList, responses]);
+  sheet.appendRow([id, name, date, time, endTime, location, description, isSecret, inviteList, responses]);
 }
 
 // ——— Wall (guest notes + host posts) ———

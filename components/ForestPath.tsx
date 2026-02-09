@@ -68,7 +68,7 @@ export default function ForestPath() {
           animate={{ opacity: 1, y: 0 }}
           className="text-3xl md:text-4xl font-serif text-moss-deep mb-8"
         >
-          The Forest Path
+          Itinerary
         </motion.h2>
 
         {/* Mist Level */}
@@ -123,7 +123,10 @@ export default function ForestPath() {
                     )}
                   </div>
                   <p className="text-sm text-moss-deep/60 mb-2">
-                    {event.date || ''} {event.time && `• ${event.time}`}
+                    {event.date || ''}
+                    {event.time && ` • ${event.time}`}
+                    {event.endTime && ` – ${event.endTime}`}
+                    {event.location && ` • ${event.location}`}
                   </p>
                   {event.description && (
                     <p className="text-sm text-moss-deep/70 mt-2">

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { getUserName, logout } from '@/lib/auth'
+import { getUserName, logout, STEF_ADMIN_NAME } from '@/lib/auth'
 import { useTheme, type Theme } from '@/components/ThemeProvider'
 
 const NAV_ITEMS = [
@@ -39,7 +39,7 @@ export default function Navigation() {
   // Don't show nav on entry page
   if (pathname === '/') return null
 
-  const isAdmin = userName === 'Stef'
+  const isAdmin = userName === STEF_ADMIN_NAME
   const googleSheetUrl = process.env.NEXT_PUBLIC_GOOGLE_SHEET_URL || 'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID'
 
   return (

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { setUserName, verifyMagicWord } from '@/lib/auth'
+import { setUserName, verifyLogin, STEF_ADMIN_NAME } from '@/lib/auth'
 
 // Only used when NEXT_PUBLIC_GOOGLE_SCRIPT_URL is not set (e.g. local dev without .env.local)
 const FALLBACK_GUEST_NAMES = ['Stef', 'Alex', 'Jordan']
@@ -66,8 +66,8 @@ export default function EntryWay() {
       return
     }
 
-    if (!verifyMagicWord(magicWord)) {
-      setError('The magic word does not resonate with the forest')
+    if (!verifyLogin(magicWord, selectedName)) {
+      setError(selectedName === STEF_ADMIN_NAME ? 'Incorrect admin password' : 'The magic word does not resonate with the forest')
       return
     }
 
@@ -148,14 +148,14 @@ export default function EntryWay() {
 
             <div>
               <label htmlFor="magicWord" className="block text-sm font-medium text-moss-deep mb-2">
-                Magic Word
+                {selectedName === STEF_ADMIN_NAME ? 'Admin password' : 'Magic word'}
               </label>
               <input
                 id="magicWord"
-                type="text"
+                type="password"
                 value={magicWord}
                 onChange={(e) => setMagicWord(e.target.value)}
-                placeholder="Whisper the secret..."
+                placeholder={selectedName === STEF_ADMIN_NAME ? 'Enter admin password' : 'Whisper the secret...'}
                 className="w-full px-4 py-3 bg-white border border-moss-deep/20 rounded-md focus:outline-none focus:ring-2 focus:ring-moss-deep/30 focus:border-moss-deep/40 text-moss-deep placeholder:text-moss-deep/40"
               />
             </div>
