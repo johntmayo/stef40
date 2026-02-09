@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react'
 
-// Replace with your Google Apps Script Web App URL
-const GOOGLE_SCRIPT_URL = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL || ''
-
-if (!GOOGLE_SCRIPT_URL && typeof window !== 'undefined') {
-  console.warn('NEXT_PUBLIC_GOOGLE_SCRIPT_URL is not set. Please configure it in .env.local')
-}
+// Use same-origin API proxy to avoid CORS (browser preflight blocks POST to Google Apps Script)
+const getSheetsBaseUrl = () =>
+  typeof window !== 'undefined' ? '/api/sheets' : (process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL || '')
 
 export interface Event {
   id: string
@@ -59,7 +56,7 @@ export function useGoogleSheets() {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=${endpoint}`)
+      const response = await fetch(`${getSheetsBaseUrl()}?action=${endpoint}`)
       if (!response.ok) throw new Error('Failed to fetch data')
       const data = await response.json()
       return data
@@ -75,7 +72,7 @@ export function useGoogleSheets() {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
+      const response = await fetch(getSheetsBaseUrl(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,13 +102,13 @@ export function useGoogleSheets() {
 }
 
 export async function getEvents(userName: string): Promise<Event[]> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  const url = getSheetsBaseUrl()
   if (!url) {
-    console.warn('Google Script URL not configured')
+    console.warn('Sheets API not configured')
     return []
   }
   try {
-    const response = await fetch(`${url}?action=getEvents&userName=${userName}`)
+    const response = await fetch(`${url}?action=getEvents&userName=${encodeURIComponent(userName)}`)
     if (!response.ok) throw new Error('Failed to fetch events')
     const data = await response.json()
     
@@ -137,11 +134,11 @@ export async function updateEventResponse(
   userName: string,
   response: 'in' | 'out'
 ): Promise<void> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  const url = getSheetsBaseUrl()
   if (!url) {
-    throw new Error('Google Script URL not configured')
+    throw new Error('Sheets API not configured')
   }
-  await fetch(url, {
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -151,12 +148,16 @@ export async function updateEventResponse(
       response,
     }),
   })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error((err as { error?: string }).error || 'Failed to update response')
+  }
 }
 
 export async function getGuestNotes(): Promise<GuestNote[]> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  const url = getSheetsBaseUrl()
   if (!url) {
-    console.warn('Google Script URL not configured')
+    console.warn('Sheets API not configured')
     return []
   }
   try {
@@ -182,11 +183,11 @@ export async function getGuestNotes(): Promise<GuestNote[]> {
 }
 
 export async function addGuestNote(name: string, message: string): Promise<void> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  const url = getSheetsBaseUrl()
   if (!url) {
-    throw new Error('Google Script URL not configured')
+    throw new Error('Sheets API not configured')
   }
-  await fetch(url, {
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -195,10 +196,14 @@ export async function addGuestNote(name: string, message: string): Promise<void>
       message,
     }),
   })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error((err as { error?: string }).error || 'Failed to add note')
+  }
 }
 
 export async function getMistLevel(): Promise<MistLevel> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  const url = getSheetsBaseUrl()
   if (!url) {
     return { level: 'Unknown', message: 'Configuration needed' }
   }
@@ -208,11 +213,11 @@ export async function getMistLevel(): Promise<MistLevel> {
 }
 
 export async function updateUserMood(userName: string, mood: string): Promise<void> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  const url = getSheetsBaseUrl()
   if (!url) {
-    throw new Error('Google Script URL not configured')
+    throw new Error('Sheets API not configured')
   }
-  await fetch(url, {
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -221,14 +226,15 @@ export async function updateUserMood(userName: string, mood: string): Promise<vo
       mood,
     }),
   })
+  if (!res.ok) throw new Error('Failed to update mood')
 }
 
 export async function getUserMood(userName: string): Promise<string | null> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  const url = getSheetsBaseUrl()
   if (!url) {
     return null
   }
-  const response = await fetch(`${url}?action=getUserMood&userName=${userName}`)
+  const response = await fetch(`${url}?action=getUserMood&userName=${encodeURIComponent(userName)}`)
   if (!response.ok) throw new Error('Failed to fetch user mood')
   const data = await response.json()
   return data.mood || null
@@ -236,7 +242,7 @@ export async function getUserMood(userName: string): Promise<string | null> {
 
 /** All events with responses (no secret filtering). For admin only. */
 export async function getAllEvents(): Promise<Event[]> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  const url = getSheetsBaseUrl()
   if (!url) return []
   try {
     const response = await fetch(`${url}?action=getAllEvents`)
@@ -250,9 +256,9 @@ export async function getAllEvents(): Promise<Event[]> {
 }
 
 export async function getGuests(): Promise<string[]> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  const url = getSheetsBaseUrl()
   if (!url) {
-    console.warn('Google Script URL not configured')
+    console.warn('Sheets API not configured')
     return []
   }
   try {
@@ -267,8 +273,8 @@ export async function getGuests(): Promise<string[]> {
 }
 
 export async function createEvent(event: CreateEventPayload): Promise<void> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
-  if (!url) throw new Error('Google Script URL not configured')
+  const url = getSheetsBaseUrl()
+  if (!url) throw new Error('Sheets API not configured')
   const payload = {
     ...event,
     id: event.id || (crypto.randomUUID?.() ?? `event-${Date.now()}`),
@@ -287,8 +293,8 @@ export async function createEvent(event: CreateEventPayload): Promise<void> {
 }
 
 export async function addPost(name: string, message: string): Promise<void> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
-  if (!url) throw new Error('Google Script URL not configured')
+  const url = getSheetsBaseUrl()
+  if (!url) throw new Error('Sheets API not configured')
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -306,7 +312,7 @@ export interface LogisticsItem {
 }
 
 export async function getLogistics(): Promise<LogisticsItem[]> {
-  const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+  const url = getSheetsBaseUrl()
   if (!url) return []
   try {
     const response = await fetch(`${url}?action=getLogistics`)

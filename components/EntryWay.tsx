@@ -19,7 +19,7 @@ export default function EntryWay() {
   const router = useRouter()
 
   useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+    const url = typeof window !== 'undefined' ? '/api/sheets' : (process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL || '')
     if (!url) {
       setGuestNames(FALLBACK_GUEST_NAMES)
       setLoadingGuests(false)

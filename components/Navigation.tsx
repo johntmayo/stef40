@@ -8,10 +8,11 @@ import { getUserName, logout, STEF_ADMIN_NAME } from '@/lib/auth'
 import { useTheme, type Theme } from '@/components/ThemeProvider'
 
 const NAV_ITEMS = [
-  { path: '/canopy', label: 'Canopy' },
-  { path: '/root-system', label: 'Root System' },
-  { path: '/forest-path', label: 'Forest Path' },
-  { path: '/whispering-wall', label: 'Whispering Wall' },
+  { path: '/canopy', label: 'Dashboard' },
+  { path: '/info', label: 'Info' },
+  { path: '/root-system', label: 'RSVPs' },
+  { path: '/forest-path', label: 'Itinerary' },
+  { path: '/whispering-wall', label: 'Guestbook' },
 ]
 
 const THEMES: { value: Theme; label: string }[] = [
