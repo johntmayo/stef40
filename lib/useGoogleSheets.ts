@@ -267,7 +267,7 @@ export async function createEvent(event: CreateEventPayload): Promise<void> {
   if (!url) throw new Error('Google Script URL not configured')
   const payload = {
     ...event,
-    id: event.id || crypto.randomUUID?.() ?? `event-${Date.now()}`,
+    id: event.id || (crypto.randomUUID?.() ?? `event-${Date.now()}`),
     inviteList: Array.isArray(event.inviteList) ? event.inviteList : [],
     responses: event.responses ?? {},
   }
