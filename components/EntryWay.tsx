@@ -5,52 +5,50 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { setUserName, verifyMagicWord } from '@/lib/auth'
 
-// Fallback guest names - these will be used if API doesn't return guest list
-const FALLBACK_GUEST_NAMES = [
-  'Stef',
-  'Alex',
-  'Jordan',
-  'Morgan',
-  'Riley',
-  'Casey',
-  'Taylor',
-  'Sam',
-]
+// Only used when NEXT_PUBLIC_GOOGLE_SCRIPT_URL is not set (e.g. local dev without .env.local)
+const FALLBACK_GUEST_NAMES = ['Stef', 'Alex', 'Jordan']
 
 export default function EntryWay() {
   const [selectedName, setSelectedName] = useState('')
   const [magicWord, setMagicWord] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [guestNames, setGuestNames] = useState<string[]>(FALLBACK_GUEST_NAMES)
+  const [guestNames, setGuestNames] = useState<string[]>([])
   const [loadingGuests, setLoadingGuests] = useState(true)
+  const [guestsError, setGuestsError] = useState<string | null>(null)
   const router = useRouter()
 
-  // Try to fetch guest names from the API
   useEffect(() => {
+    const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
+    if (!url) {
+      setGuestNames(FALLBACK_GUEST_NAMES)
+      setLoadingGuests(false)
+      return
+    }
+
     const fetchGuestNames = async () => {
       try {
-        const url = process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL
-        if (!url) {
-          setLoadingGuests(false)
+        setGuestsError(null)
+        const response = await fetch(`${url}?action=getGuests`)
+        if (!response.ok) {
+          setGuestsError('Could not load guest list')
+          setGuestNames([])
           return
         }
-        
-        // Try to get guests from the API
-        const response = await fetch(`${url}?action=getGuests`)
-        if (response.ok) {
-          const data = await response.json()
-          // Handle different possible response formats
-          if (data.Guests && Array.isArray(data.Guests) && data.Guests.length > 0) {
-            setGuestNames(data.Guests)
-          } else if (Array.isArray(data) && data.length > 0) {
-            setGuestNames(data)
-          } else if (data.guests && Array.isArray(data.guests)) {
-            setGuestNames(data.guests)
-          }
+        const data = await response.json()
+        if (data.Guests && Array.isArray(data.Guests) && data.Guests.length > 0) {
+          setGuestNames(data.Guests)
+        } else if (Array.isArray(data) && data.length > 0) {
+          setGuestNames(data)
+        } else if (data.guests && Array.isArray(data.guests) && data.guests.length > 0) {
+          setGuestNames(data.guests)
+        } else {
+          setGuestNames([])
+          setGuestsError('No guests in spreadsheet')
         }
-      } catch (error) {
-        console.log('Could not fetch guest names from API, using fallback list')
+      } catch {
+        setGuestsError('Could not load guest list')
+        setGuestNames([])
       } finally {
         setLoadingGuests(false)
       }
@@ -133,7 +131,7 @@ export default function EntryWay() {
                 className="w-full px-4 py-3 bg-white border border-moss-deep/20 rounded-md focus:outline-none focus:ring-2 focus:ring-moss-deep/30 focus:border-moss-deep/40 text-moss-deep disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="">
-                  {loadingGuests ? 'Loading guests...' : 'Select your name...'}
+                  {loadingGuests ? 'Loading guests...' : guestNames.length === 0 ? 'No guests loaded' : 'Select your name...'}
                 </option>
                 {guestNames.map((name) => (
                   <option key={name} value={name}>
@@ -141,6 +139,11 @@ export default function EntryWay() {
                   </option>
                 ))}
               </select>
+              {guestsError && !loadingGuests && (
+                <p className="mt-2 text-sm text-amber-700 dark:text-amber-400">
+                  {guestsError}. Check that the app is configured with your Google Sheet URL (e.g. in Vercel: Settings → Environment Variables → NEXT_PUBLIC_GOOGLE_SCRIPT_URL).
+                </p>
+              )}
             </div>
 
             <div>
